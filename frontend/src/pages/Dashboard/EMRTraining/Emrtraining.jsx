@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Play, Clock, Users, ExternalLink, CheckCircle, X, FileText, Loader, MapPin, AlertCircle, Info } from 'lucide-react';
+import { Calendar, Clock, ExternalLink, CheckCircle, X, FileText, Loader, MapPin, AlertCircle } from 'lucide-react';
 import HipaaAgreementComponent from './HipaaAgreeement';
 import HipaaContent from './HipaaContent';
 import ConfirmationModal from '../../../components/Common/ConfirmationModal';
+import AccessRequestComponent from './AccessRequest';
 import api from '../../../services/api.js';
 import { toast } from 'react-toastify';
 
 const EmrTrainingComponent = () => {
   const [activeTab, setActiveTab] = useState('book');
-  const [selectedMonth, setSelectedMonth] = useState(null);
   const [registrations, setRegistrations] = useState([]);
   const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false);
   const [showAgreement, setShowAgreement] = useState(false);
@@ -59,7 +59,6 @@ const EmrTrainingComponent = () => {
         setIsLoadingStatus(false);
       }
     };
-
     checkHipaaStatus();
   }, []);
 
@@ -94,40 +93,40 @@ const EmrTrainingComponent = () => {
   };
 
   const confirmRegistration = async () => {
-  try {
-    const response = await api.post('/emr-training/register', {
-      month: selectedSession.month,
-      sessionTime: selectedSession.time
-    });
-    
-    if (response.data.success) {
-      toast.success('Registration request submitted successfully! Awaiting admin approval.');
-      await fetchUserRegistrations();
-      setActiveTab('registrations');
+    try {
+      const response = await api.post('/emr-training/register', {
+        month: selectedSession.month,
+        sessionTime: selectedSession.time
+      });
+      
+      if (response.data.success) {
+        toast.success('Registration request submitted successfully! Awaiting admin approval.');
+        await fetchUserRegistrations();
+        setActiveTab('registrations');
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Registration failed. Please try again.';
+      toast.error(errorMessage);
+      console.error('Registration error:', error);
+    } finally {
+      setShowRegistrationModal(false);
+      setSelectedSession(null);
     }
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || 'Registration failed. Please try again.';
-    toast.error(errorMessage);
-    console.error('Registration error:', error);
-  } finally {
-    setShowRegistrationModal(false);
-    setSelectedSession(null);
-  }
-};
+  };
 
-const handleCancelRegistration = async (registrationId) => {
-  try {
-    const response = await api.delete(`/emr-training/registrations/${registrationId}`);
-    if (response.data.success) {
-      toast.success('Registration cancelled successfully');
-      await fetchUserRegistrations();
+  const handleCancelRegistration = async (registrationId) => {
+    try {
+      const response = await api.delete(`/emr-training/registrations/${registrationId}`);
+      if (response.data.success) {
+        toast.success('Registration cancelled successfully');
+        await fetchUserRegistrations();
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to cancel registration';
+      toast.error(errorMessage);
+      console.error('Cancel error:', error);
     }
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || 'Failed to cancel registration';
-    toast.error(errorMessage);
-    console.error('Cancel error:', error);
-  }
-};
+  };
 
   const handleShowBookingTab = () => {
     if (!hasAgreedToTerms) {
@@ -367,17 +366,20 @@ const handleCancelRegistration = async (registrationId) => {
       {activeTab === 'recordings' && (
         <div>
           <h2 className="text-lg sm:text-xl font-semibold text-[#04445E] mb-6">
-            Available Recordings
+            Virtual Training Access
           </h2>
-          <a
-            href="https://app.nextstepscareer.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-[#04445E] text-white px-6 py-3 rounded-lg shadow hover:bg-[#06617f] transition font-medium"
-          >
-            <ExternalLink className="h-5 w-5" />
-            Click here to access NextSteps App
-          </a>
+          <AccessRequestComponent />
+          <div className="mt-6">
+            <a
+              href="https://app.nextstepscareer.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#04445E] text-white px-6 py-3 rounded-lg shadow hover:bg-[#06617f] transition font-medium"
+            >
+              <ExternalLink className="h-5 w-5" />
+              Click here to login to NextSteps App
+            </a>
+          </div>
         </div>
       )}
 

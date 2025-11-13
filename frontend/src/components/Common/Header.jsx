@@ -26,7 +26,7 @@ const Header = ({ onLogout }) => {
               className="h-8 sm:h-10 flex-shrink-0"
             />
             <h1 className="text-sm sm:text-lg md:text-xl font-semibold text-[#04445E] truncate">
-              <span className="hidden sm:inline">Next Steps-USMLE CV Builder</span>
+              <span className="hidden sm:inline">Next Steps-USMLE CV Builder- Dev Environment</span>
               <span className="sm:hidden text-lg ">Next Steps CV Portal</span>
             </h1>
           </div>
